@@ -7,7 +7,6 @@ import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('clubs')
 @ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'))
 @Controller('clubs')
 export class ClubsController {
   constructor(private readonly clubsService: ClubsService) {}
@@ -16,8 +15,8 @@ export class ClubsController {
   @ApiOperation({ summary: 'Create a new running club' })
   @ApiResponse({ status: 201, description: 'The club has been successfully created.'})
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  create(@Body() createClubDto: CreateClubDto, @Req() req) {
-    return this.clubsService.create(createClubDto, req.user.userId);
+  create(@Body() createClubDto: CreateClubDto) {
+    return this.clubsService.create(createClubDto);
   }
 
   @Get()

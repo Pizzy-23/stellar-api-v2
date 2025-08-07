@@ -35,7 +35,7 @@ export class WalletController {
     description: 'User or Stellar account not found.',
   })
   async getBalance(@Req() req) {
-    if (!req.user || !req.user.userId) {
+    if (!req.user || !req.user.id) {
       throw new UnauthorizedException();
     }
     const userProfile = await this.usersService.getProfileById(req.user.userId);

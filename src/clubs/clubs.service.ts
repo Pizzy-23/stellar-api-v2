@@ -15,10 +15,10 @@ export class ClubsService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async create(createClubDto: CreateClubDto, userId: string): Promise<Club> {
-    const creator = await this.userRepository.findOneBy({ id: userId });
+  async create(createClubDto: CreateClubDto): Promise<Club> {
+    const creator = await this.userRepository.findOneBy({ id: createClubDto.userId });
     if (!creator) {
-      throw new NotFoundException(`Creator with User ID ${userId} not found.`);
+      throw new NotFoundException(`Creator with User ID ${createClubDto.userId} not found.`);
     }
 
     const club = this.clubRepository.create({

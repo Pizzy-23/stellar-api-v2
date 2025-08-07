@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 import { DistributionType } from '../entities/club.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -18,6 +24,14 @@ export class CreateClubDto {
   @IsNumber()
   @IsPositive()
   usdcPool: number;
+
+  @ApiProperty({
+    description: 'The id for creator.',
+    example: '32178f9327819',
+  })
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
 
   @ApiProperty({
     description: 'The reward distribution method for the club.',

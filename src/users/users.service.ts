@@ -8,6 +8,7 @@ import { Keypair } from 'stellar-sdk';
 
 @Injectable()
 export class UsersService {
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -19,12 +20,11 @@ export class UsersService {
     const keypair = Keypair.random();
     const stellarAddress = keypair.publicKey();
     const secret = keypair.secret();
-
     const user = this.userRepository.create({
       ...createUserDto,
       stellarAddress: stellarAddress,
     });
-
+    console.log('Created User Entity:', user);
     await this.userRepository.save(user);
 
     const { password, ...result } = user;
