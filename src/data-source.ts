@@ -4,10 +4,10 @@ dotenv.config();
 
 function getDataSourceOptions(): DataSourceOptions {
   // Se existir DATABASE_URL no .env, usa ela
-  if (process.env.DATABASE_URL) {
+  if (process.env.DB_URL) {
     return {
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      url: process.env.DB_URL,
       synchronize: false,
       entities: ['src/**/*.entity.ts'],
       migrations: ['src/migrations/*.ts'],
