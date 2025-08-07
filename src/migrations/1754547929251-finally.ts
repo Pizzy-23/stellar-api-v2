@@ -1,10 +1,11 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class NewMigration1754518537189 implements MigrationInterface {
-    name = 'NewMigration1754518537189'
+export class Finally1754547929251 implements MigrationInterface {
+    name = 'Finally1754547929251'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "activity" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "distanceKm" numeric(10,3) NOT NULL, "durationSeconds" integer NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "userId" uuid, "clubId" uuid, CONSTRAINT "PK_24625a1d6b1b089c8ae206fe467" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TYPE "public"."club_distributiontype_enum" AS ENUM('EQUAL', 'PROPORTIONAL')`);
         await queryRunner.query(`CREATE TABLE "club" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "usdcPool" numeric(10,2) NOT NULL DEFAULT '0', "distributionType" "public"."club_distributiontype_enum" NOT NULL DEFAULT 'PROPORTIONAL', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "creatorId" uuid, CONSTRAINT "PK_79282481e036a6e0b180afa38aa" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "username" character varying NOT NULL, "email" character varying NOT NULL, "password" character varying NOT NULL, "stellarAddress" character varying, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "UQ_78a916df40e02a9deb1c4b75edb" UNIQUE ("username"), CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "user_clubs_club" ("userId" uuid NOT NULL, "clubId" uuid NOT NULL, CONSTRAINT "PK_8d2e46e0fed2efe2a70dcee474f" PRIMARY KEY ("userId", "clubId"))`);
@@ -28,6 +29,7 @@ export class NewMigration1754518537189 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "user_clubs_club"`);
         await queryRunner.query(`DROP TABLE "user"`);
         await queryRunner.query(`DROP TABLE "club"`);
+        await queryRunner.query(`DROP TYPE "public"."club_distributiontype_enum"`);
         await queryRunner.query(`DROP TABLE "activity"`);
     }
 
