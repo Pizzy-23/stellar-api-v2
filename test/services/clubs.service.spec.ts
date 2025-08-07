@@ -1,11 +1,11 @@
-import { NotFoundException, ForbiddenException } from "@nestjs/common";
-import { TestingModule, Test } from "@nestjs/testing";
-import { getRepositoryToken } from "@nestjs/typeorm";
-import { ClubsService } from "src/clubs/clubs.service";
-import { CreateClubDto } from "src/clubs/dto/create-club.dto";
-import { Club, DistributionType } from "src/clubs/entities/club.entity";
-import { User } from "src/users/entities/user.entity";
-import { Repository } from "typeorm";
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { TestingModule, Test } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { ClubsService } from 'src/clubs/clubs.service';
+import { CreateClubDto } from 'src/clubs/dto/create-club.dto';
+import { Club, DistributionType } from 'src/clubs/entities/club.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Repository } from 'typeorm';
 
 describe('ClubsService', () => {
   let service: ClubsService;
@@ -77,23 +77,43 @@ describe('ClubsService', () => {
         name: 'New Club',
         usdcPool: 100,
         distributionType: DistributionType.PROPORTIONAL,
+        userId: userId, 
       };
 
       mockUserRepo.findOneBy.mockResolvedValue(mockUser);
-      mockClubRepo.create.mockReturnValue({ ...createClubDto, creator: mockUser, members: [mockUser] });
-      mockClubRepo.save.mockResolvedValue({ id: clubId, ...createClubDto, creator: mockUser, members: [mockUser] });
-      
-      const result = await service.create(createClubDto, userId);
-      
+      mockClubRepo.create.mockReturnValue({
+        ...createClubDto,
+        creator: mockUser,
+        members: [mockUser],
+      });
+      mockClubRepo.save.mockResolvedValue({
+        id: clubId,
+        ...createClubDto,
+        creator: mockUser,
+        members: [mockUser],
+      });
+
+      const result = await service.create(createClubDto);
+
       expect(mockUserRepo.findOneBy).toHaveBeenCalledWith({ id: userId });
-      expect(mockClubRepo.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'New Club' }));
+      expect(mockClubRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'New Club' }),
+      );
       expect(mockClubRepo.save).toHaveBeenCalled();
       expect(result.name).toBe('New Club');
     });
 
     it('should throw NotFoundException if creator is not found', async () => {
       mockUserRepo.findOneBy.mockResolvedValue(null);
-      await expect(service.create({} as CreateClubDto, 'unknown-user')).rejects.toThrow(NotFoundException);
+      const dtoWithUnknownUser: CreateClubDto = {
+        userId: 'unknown-user',
+        name: 'test',
+        usdcPool: 0,
+        distributionType: DistributionType.PROPORTIONAL,
+      };
+      await expect(service.create(dtoWithUnknownUser)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -101,18 +121,22 @@ describe('ClubsService', () => {
     it('should update a club if user is the creator', async () => {
       const updateDto = { name: 'Updated Club Name' };
       mockClubRepo.save.mockResolvedValue({ ...mockClub, ...updateDto });
-      
+
       const result = await service.update(clubId, updateDto, userId);
-      
-      expect(mockClubRepo.save).toHaveBeenCalledWith(expect.objectContaining({ name: 'Updated Club Name' }));
+
+      expect(mockClubRepo.save).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Updated Club Name' }),
+      );
       expect(result.name).toBe('Updated Club Name');
     });
 
     it('should throw ForbiddenException if user is not the creator', async () => {
-      await expect(service.update(clubId, {}, otherUserId)).rejects.toThrow(ForbiddenException);
+      await expect(service.update(clubId, {}, otherUserId)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
-  
+
   describe('remove', () => {
     it('should remove a club if user is the creator', async () => {
       await service.remove(clubId, userId);
@@ -120,7 +144,9 @@ describe('ClubsService', () => {
     });
 
     it('should throw ForbiddenException if user is not the creator', async () => {
-      await expect(service.remove(clubId, otherUserId)).rejects.toThrow(ForbiddenException);
+      await expect(service.remove(clubId, otherUserId)).rejects.toThrow(
+        ForbiddenException,
+      );
       expect(mockClubRepo.remove).not.toHaveBeenCalled();
     });
   });
@@ -128,18 +154,18 @@ describe('ClubsService', () => {
   describe('joinClub', () => {
     it('should add a user to the members list and save', async () => {
       mockUserRepo.findOneBy.mockResolvedValue(mockOtherUser);
-      mockClubRepo.save.mockImplementation(club => Promise.resolve(club));
+      mockClubRepo.save.mockImplementation((club) => Promise.resolve(club));
 
       const result = await service.joinClub(clubId, otherUserId);
-      
+
       expect(result.members).toHaveLength(2);
-      expect(result.members.some(m => m.id === otherUserId)).toBe(true);
+      expect(result.members.some((m) => m.id === otherUserId)).toBe(true);
       expect(mockClubRepo.save).toHaveBeenCalled();
     });
 
     it('should not add a user if they are already a member', async () => {
-      mockUserRepo.findOneBy.mockResolvedValue(mockUser); 
-      
+      mockUserRepo.findOneBy.mockResolvedValue(mockUser);
+
       const result = await service.joinClub(clubId, userId);
 
       expect(result.members).toHaveLength(1);
@@ -152,12 +178,12 @@ describe('ClubsService', () => {
       mockClub.members.push(mockOtherUser);
       expect(mockClub.members).toHaveLength(2);
 
-      mockClubRepo.save.mockImplementation(club => Promise.resolve(club));
+      mockClubRepo.save.mockImplementation((club) => Promise.resolve(club));
 
       const result = await service.leaveClub(clubId, otherUserId);
 
       expect(result.members).toHaveLength(1);
-      expect(result.members.some(m => m.id === otherUserId)).toBe(false);
+      expect(result.members.some((m) => m.id === otherUserId)).toBe(false);
       expect(mockClubRepo.save).toHaveBeenCalled();
     });
   });

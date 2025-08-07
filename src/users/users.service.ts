@@ -8,7 +8,6 @@ import { Keypair } from 'stellar-sdk';
 
 @Injectable()
 export class UsersService {
-
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -67,6 +66,12 @@ export class UsersService {
 
   async softDelete(id: string): Promise<void> {
     const result = await this.userRepository.softDelete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${id} not found.`);
+    }
+  }
+    async hardDelete(id: string): Promise<void> {
+    const result = await this.userRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found.`);
     }
