@@ -12,7 +12,7 @@
     }
   },
   "deploy": {
-    "startCommand": "yarn migration:run && yarn start:prod ",
+    "startCommand": "yarn migration:prod:run && yarn start:prod ",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
